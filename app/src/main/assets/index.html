@@ -50,7 +50,42 @@
   .big{font-size:30px;font-weight:900;color:var(--navy)}
   .link{display:block;margin-top:8px;padding:10px 12px;border-radius:10px;background:#eef2f8;color:var(--navy);text-decoration:none;font-weight:700;font-size:14px}
   .link.cta{background:#0f8a6d;color:#fff;text-align:center;border-radius:999px;padding:12px}
-  @media (orientation: landscape){ .msg{max-width:70%} }
+  /* 面接室 */
+  #interview{background:#0f1420}
+  .stage{position:relative;height:36vh;min-height:200px;flex:none;overflow:hidden;background:#1a1f2b}
+  .scene{position:absolute;inset:0}
+  .scene svg{width:100%;height:100%;display:block}
+  .shade{position:absolute;inset:0;background:#000;opacity:1;transition:opacity 1.6s;pointer-events:none}
+  .vign{position:absolute;inset:0;pointer-events:none;box-shadow:inset 0 0 90px rgba(120,0,0,0);transition:box-shadow .6s}
+  .vign.on{animation:beat 1s infinite}
+  @keyframes beat{0%,100%{box-shadow:inset 0 0 60px rgba(150,0,0,.25)}50%{box-shadow:inset 0 0 110px rgba(150,0,0,.55)}}
+  .cap{position:absolute;left:0;top:0;padding:6px 10px;color:#fff;background:rgba(10,14,24,.55);border-bottom-right-radius:10px;font-size:11px;line-height:1.3}
+  .cap b{display:block;font-size:14px}
+  .timer{position:absolute;left:0;right:0;bottom:0;height:5px;background:rgba(255,255,255,.12)}
+  .timer i{display:block;height:100%;width:0;background:#c9a227}
+  .timer i.low{background:#e74c3c}
+  .talk{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg)}
+  #interview .prog{height:4px;background:#d8d2c4;flex:none}
+  #chat{min-height:0}
+  #opts{flex:none;max-height:34vh;overflow-y:auto}
+  #opts button{padding:10px 12px;font-size:14px;margin-top:6px}
+  /* 表情とまばたき */
+  .eye{transform-box:fill-box;transform-origin:center;animation:blink 4.5s infinite}
+  @keyframes blink{0%,92%,100%{transform:scaleY(1)}95%{transform:scaleY(.1)}}
+  .head{transition:transform .3s}
+  .nod .head{animation:nod .9s 2}
+  @keyframes nod{30%{transform:translateY(5px)}60%{transform:translateY(0)}}
+  .writing .pen{display:inline;animation:write .5s infinite alternate}
+  .pen{display:none}
+  @keyframes write{to{transform:translate(8px,2px)}}
+  .clockhand{transform-origin:340px 46px;animation:tick 60s steps(60) infinite}
+  @keyframes tick{to{transform:rotate(360deg)}}
+  @media (orientation: landscape){
+    .msg{max-width:80%}
+    #interview{flex-direction:row}
+    .stage{height:auto;width:46%;min-height:0}
+    #opts{max-height:52vh}
+  }
 </style>
 </head>
 <body>
@@ -76,10 +111,18 @@
 
 <!-- 面接 -->
 <section class="scr" id="interview">
-  <div class="ihead"><span class="av" id="iAv"></span><div><b id="iFirm"></b><small id="iName"></small></div></div>
-  <div class="prog"><i id="prog"></i></div>
-  <div id="chat"></div>
-  <div id="opts"></div>
+  <div class="stage">
+    <div class="scene" id="scene"></div>
+    <div class="shade" id="shade"></div>
+    <div class="vign" id="vign"></div>
+    <div class="cap"><b id="iFirm"></b><small id="iName"></small></div>
+    <div class="timer"><i id="timer"></i></div>
+  </div>
+  <div class="talk">
+    <div class="prog"><i id="prog"></i></div>
+    <div id="chat"></div>
+    <div id="opts"></div>
+  </div>
 </section>
 
 <!-- 結果 -->
@@ -147,6 +190,90 @@ const FIRMS = [
    note:'IT系の巨人。正式名称は「あいびき・ミンチ・コーポレーション」。',
    special:{at:'motive', t:'牛と豚の黄金比を、ITで追求したいからです', d:{all:6}, msg:'7対3だ。……君とはいい仕事ができそうだ。'}},
 ];
+
+// ================= 面接官の見た目 =================
+// hair: 髪の色 / long: 長い髪 / gray: 白髪まじり / glasses: メガネ / tie: ネクタイかスカーフの色 / suit: スーツの色
+const LOOK = {
+  mck:{hair:'#2a2420', gray:true, glasses:true, tie:'#1d3557', suit:'#22262f'},
+  bcg:{hair:'#3b2a20', long:true, tie:'#2a9d8f', suit:'#2b2d36'},
+  bain:{hair:'#111', glasses:false, tie:'#b22222', suit:'#1e2230'},
+  atk:{hair:'#5a3a22', tie:'#e9a400', suit:'#2a2a2a'},
+  rb:{hair:'#7a5230', gray:true, tie:'#8b4513', suit:'#30302c'},
+  acc:{hair:'#1a1a1a', long:true, glasses:true, tie:'#7b2cbf', suit:'#1f1f27'},
+  dt:{hair:'#2b1d14', tie:'#d62828', suit:'#262b35'},
+  pwc:{hair:'#444', gray:true, glasses:true, tie:'#4ea8de', suit:'#2d3340'},
+  kpgm:{hair:'#1c1c1c', tie:'#0353a4', suit:'#212634'},
+  eyy:{hair:'#d4a017', tie:'#ffd60a', suit:'#1b1b1b'},
+  nora:{hair:'#3d2b1f', long:true, tie:'#6a994e', suit:'#2e2e2e'},
+  bayc:{hair:'#222', glasses:true, tie:'#e76f51', suit:'#283044'},
+  ibn:{hair:'#555', gray:true, tie:'#1d4e89', suit:'#232a3a'},
+};
+const FACE = {
+  neutral:{brow:'M178 108 L194 107 M206 107 L222 108', mouth:'M190 146 Q200 148 210 146', eyeY:0},
+  smile:{brow:'M178 105 Q186 101 194 104 M206 104 Q214 101 222 105', mouth:'M188 142 Q200 155 212 142', eyeY:0},
+  frown:{brow:'M178 103 L194 110 M206 110 L222 103', mouth:'M190 150 Q200 142 210 150', eyeY:1},
+  think:{brow:'M178 107 L194 108 M206 108 L222 107', mouth:'M193 147 L207 147', eyeY:4},
+  surprise:{brow:'M178 101 Q186 97 194 100 M206 100 Q214 97 222 101', mouth:'M195 147 a5 6 0 1 0 10 0 a5 6 0 1 0 -10 0', eyeY:-1},
+};
+function sceneSVG(f){
+  const k = Object.assign({hair:'#222', tie:'#333', suit:'#252a33'}, LOOK[f.id] || {});
+  const skin = '#f0cfb2', short = f.n.replace(/[・（）()].*$/, '').slice(0, 10);
+  const hair = k.long
+    ? `<path d="M164 118 Q160 70 200 70 Q240 70 236 118 L240 170 Q228 160 226 130 Q220 92 200 90 Q180 92 174 130 Q172 160 160 170 Z" fill="${k.hair}"/>`
+    : `<path d="M166 112 Q164 74 200 72 Q236 74 234 112 Q228 92 200 90 Q172 92 166 112 Z" fill="${k.hair}"/>`;
+  const gray = k.gray ? `<path d="M168 104 Q170 92 178 88 M232 104 Q230 92 222 88" stroke="#ccc" stroke-width="4" fill="none" opacity=".8"/>` : '';
+  const glasses = k.glasses ? `<g fill="none" stroke="#1a1a1a" stroke-width="2"><rect x="177" y="114" width="20" height="14" rx="5"/><rect x="203" y="114" width="20" height="14" rx="5"/><path d="M197 120 L203 120"/></g>` : '';
+  return `<svg viewBox="0 0 400 240" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">
+  <defs>
+    <linearGradient id="wall" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#c9c3b6"/><stop offset="1" stop-color="#8f897d"/></linearGradient>
+    <linearGradient id="win" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#cfe4f2"/><stop offset="1" stop-color="#8fb3cf"/></linearGradient>
+    <radialGradient id="lamp" cx=".5" cy="0" r=".9"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></radialGradient>
+  </defs>
+  <rect width="400" height="240" fill="url(#wall)"/>
+  <rect x="20" y="22" width="92" height="120" fill="url(#win)"/>
+  <g stroke="#e9eef2" stroke-width="3" opacity=".85">${Array.from({length: 11}, (_, i) => `<line x1="20" y1="${26 + i * 11}" x2="112" y2="${26 + i * 11}"/>`).join('')}</g>
+  <rect x="20" y="22" width="92" height="120" fill="none" stroke="#6e685c" stroke-width="4"/>
+  <circle cx="340" cy="46" r="20" fill="#f7f4ee" stroke="#4a4a4a" stroke-width="3"/>
+  <line x1="340" y1="46" x2="340" y2="34" stroke="#222" stroke-width="2.5"/>
+  <line x1="340" y1="46" x2="350" y2="46" stroke="#222" stroke-width="2.5"/>
+  <line class="clockhand" x1="340" y1="48" x2="340" y2="29" stroke="#c0392b" stroke-width="1.2"/>
+  <rect x="300" y="96" width="70" height="46" fill="#6b5b45" opacity=".55"/>
+  <rect width="400" height="240" fill="url(#lamp)"/>
+  <g class="body">
+    <path d="M112 240 Q118 172 200 164 Q282 172 288 240 Z" fill="${k.suit}"/>
+    <path d="M184 166 L200 204 L216 166 Z" fill="#fafafa"/>
+    <path d="M196 170 L204 170 L208 206 L200 216 L192 206 Z" fill="${k.tie}"/>
+    <rect x="190" y="150" width="20" height="18" fill="${skin}"/>
+  </g>
+  <g class="head">
+    <ellipse cx="166" cy="124" rx="6" ry="9" fill="${skin}"/><ellipse cx="234" cy="124" rx="6" ry="9" fill="${skin}"/>
+    <ellipse cx="200" cy="120" rx="34" ry="40" fill="${skin}"/>
+    ${hair}${gray}
+    <g id="eyes"><ellipse class="eye" cx="187" cy="121" rx="3.6" ry="4.4" fill="#1d1d1d"/><ellipse class="eye" cx="213" cy="121" rx="3.6" ry="4.4" fill="#1d1d1d"/></g>
+    <path id="brows" d="${FACE.neutral.brow}" stroke="#2a211b" stroke-width="3" stroke-linecap="round" fill="none"/>
+    <path d="M200 124 Q197 134 200 136" stroke="#c9a68a" stroke-width="2" fill="none"/>
+    <path id="mouth" d="${FACE.neutral.mouth}" stroke="#7a3b2e" stroke-width="2.6" stroke-linecap="round" fill="none"/>
+    ${glasses}
+  </g>
+  <rect x="0" y="198" width="400" height="42" fill="#4a3322"/>
+  <rect x="0" y="196" width="400" height="5" fill="#6a4a32"/>
+  <g transform="rotate(-4 150 212)"><rect x="128" y="203" width="46" height="30" fill="#fdfdfb"/><g stroke="#bbb" stroke-width="1.5">${[210,216,222,228].map(y => `<line x1="133" y1="${y}" x2="168" y2="${y}"/>`).join('')}</g></g>
+  <g class="pen"><ellipse cx="160" cy="210" rx="9" ry="6" fill="${skin}"/><line x1="160" y1="210" x2="150" y2="224" stroke="#222" stroke-width="2.5"/></g>
+  <rect x="232" y="206" width="78" height="20" rx="2" fill="#d8c79a"/><text x="271" y="220" font-size="9" text-anchor="middle" fill="#3a2f1c" font-family="sans-serif">${short}</text>
+  <rect x="330" y="206" width="22" height="26" rx="3" fill="#e8e8e8"/><rect x="333" y="210" width="16" height="10" fill="#7a5a3a"/>
+</svg>`;
+}
+// 表情を変える（nod=うなずく / write=メモを取る）
+function face(name, opt = {}){
+  const sc = $('scene'), f = FACE[name] || FACE.neutral;
+  const b = sc.querySelector('#brows'), m = sc.querySelector('#mouth'), e = sc.querySelector('#eyes');
+  if (!b) return;
+  b.setAttribute('d', f.brow); m.setAttribute('d', f.mouth);
+  e.setAttribute('transform', `translate(0 ${f.eyeY})`);
+  sc.classList.toggle('writing', !!opt.write);
+  sc.classList.remove('nod'); void sc.offsetWidth;
+  if (opt.nod) sc.classList.add('nod');
+}
 
 // ================= 不合格の条件（プロフィール） =================
 // 当てはまった時点で不合格。メッセージはちょっと大げさに
@@ -305,8 +432,11 @@ function start(f){
     if (s.key === 'q') shuffle(qs.pool).slice(0, qs.count).forEach((q, i) => steps.push({key:'q', title:`面接質問 ${i + 1}`, q:q.q, opts:q.opts}));
     else steps.push(s);
   });
-  $('iAv').textContent = f.av; $('iFirm').textContent = f.n; $('iName').textContent = `面接官：${f.iv}`;
+  $('iFirm').textContent = f.n; $('iName').textContent = `面接官：${f.iv}`;
+  $('scene').innerHTML = sceneSVG(f);
+  $('shade').style.transition = 'none'; $('shade').style.opacity = 1;
   $('chat').innerHTML = ''; $('opts').innerHTML = '';
+  stopTimer();
   show('interview');
   run();
 }
@@ -318,13 +448,23 @@ function msg(text, cls){
 function stepLabel(t){ const d = document.createElement('div'); d.className = 'step'; d.textContent = `― ${t} ―`; $('chat').appendChild(d); }
 
 async function run(){
-  await sleep(300);
+  // 入室
+  msg('（コン、コン。）', 'r');
+  await sleep(900);
+  msg('「どうぞ」', 'q');
+  await sleep(500);
+  $('shade').style.transition = 'opacity 1.6s'; $('shade').style.opacity = 0;
+  msg('失礼します。', 'a');
+  await sleep(1400);
+  face('neutral');
   msg(`${P.name}さん、本日はよろしくお願いします。${F.iv.split(' ').pop()}です。\nまずは簡単に、ご経歴を拝見しますね。`, 'q');
+  face('think', {write: false});
   await sleep(1200);
   msg(`（${P.age}歳、現年収${P.sal}万円……）`, 'r');
   await sleep(1100);
   const pf = profileFail(P, F);
-  if (pf) return fail(pf, 'プロフィール');
+  if (pf){ face('surprise'); await sleep(900); return fail(pf, 'プロフィール'); }
+  face('neutral');
   msg('……なるほど。では、さっそく始めましょう。', 'q');
   await sleep(700);
   ask();
@@ -335,6 +475,14 @@ function ask(){
   if (si >= steps.length) return finish();
   const s = steps[si];
   stepLabel(s.title);
+  askAsync(s);
+}
+async function askAsync(s){
+  // 資料に目を落とす間。これが地味に怖い
+  face('think');
+  msg(pick(['（資料に目を落としている……）','（ペンを置いて、こちらを見た）','（しばらく沈黙が流れる……）','（手元のメモを、めくっている）']), 'r');
+  await sleep(1300 + R() * 700);
+  face('neutral');
   msg(s.q, 'q');
   let opts = s.opts.slice();
   if (F.special && F.special.at === s.key) opts.splice(Math.floor(R() * (opts.length + 1)), 0, Object.assign({special: true}, F.special, {r: F.special.msg}));
@@ -343,9 +491,35 @@ function ask(){
   const box = $('opts'); box.innerHTML = '';
   opts.forEach(o => {
     const b = document.createElement('button'); b.textContent = o.t;
-    b.onclick = () => answer(s, o);
+    b.onclick = () => { stopTimer(); answer(s, o); };
     box.appendChild(b);
   });
+  startTimer();
+}
+
+// ---- 回答の制限時間（黙っていると減点。最後は鼓動が聞こえてくる） ----
+const LIMIT = 25000;
+let timerId = null, timerT0 = 0, warned = false;
+function startTimer(){
+  stopTimer(); timerT0 = performance.now(); warned = false;
+  const bar = $('timer');
+  const tick = () => {
+    const left = Math.max(0, 1 - (performance.now() - timerT0) / LIMIT);
+    bar.style.width = (left * 100) + '%';
+    bar.classList.toggle('low', left < .3);
+    $('vign').classList.toggle('on', left < .3);
+    if (left <= 0 && !warned){
+      warned = true; score -= 1;
+      face('frown');
+      msg(pick(['……（沈黙が続いている）','「……考えがまとまりませんか？」','「沈黙は、コンサルでは減点ですよ」']), 'q');
+    }
+    timerId = requestAnimationFrame(tick);
+  };
+  timerId = requestAnimationFrame(tick);
+}
+function stopTimer(){
+  if (timerId) cancelAnimationFrame(timerId);
+  timerId = null; $('timer').style.width = '0'; $('vign').classList.remove('on');
 }
 
 async function answer(s, o){
@@ -354,10 +528,11 @@ async function answer(s, o){
   history.push({step: s.title, a: o.t});
   await sleep(700);
   const failHere = o.fail === true || (Array.isArray(o.fail) && o.fail.includes(F.cat));
-  if (failHere) return fail(o.r || o.msg, s.title);
+  if (failHere){ face('frown'); await sleep(500); return fail(o.r || o.msg, s.title); }
   const d = o.d || {};
   const pts = (d.all || 0) + (d[F.cat] || 0);
   score += pts;
+  face(pts >= 3 || o.special && pts > 0 ? 'smile' : pts >= 1 ? 'neutral' : pts === 0 ? 'think' : 'frown', {nod: pts >= 3, write: pts >= 1 && pts < 3});
   msg(o.r || 'なるほど。', 'q');
   if (!o.special){
     await sleep(500);
@@ -374,9 +549,13 @@ async function answer(s, o){
 }
 
 async function fail(reason, where){
+  stopTimer();
   $('prog').style.width = '100%';
   msg(reason, 'q');
   await sleep(1300);
+  msg('（面接官が、書類を静かに閉じた）', 'r');
+  $('shade').style.transition = 'opacity 1.4s'; $('shade').style.opacity = .85;
+  await sleep(1500);
   $('resStamp').innerHTML = '<div class="stamp ng">不合格</div>';
   $('resBody').innerHTML = `
     <div class="box"><h3>${F.n}　面接官コメント</h3>${esc(reason).replace(/\n/g, '<br>')}</div>
@@ -390,8 +569,11 @@ async function finish(){
   if (score < F.need){
     return fail(`本日はありがとうございました。\n……正直に申し上げて、決め手に欠けました。\n（合格ライン ${F.need}点に対して ${score}点）`, '総合評価');
   }
+  face('think');
   msg('本日はありがとうございました。……結果は、今お伝えしますね。', 'q');
-  await sleep(1500);
+  await sleep(1800);
+  face('smile', {nod: true});
+  await sleep(900);
   const age = P.age, bonus = Math.max(0, score - F.need) * 25;
   let offer = F.base + bonus + (F.cat === 'strategy' ? (age - 24) * 30 : (age - 24) * 20);
   offer = Math.round(Math.max(offer, F.base * .8) / 10) * 10;
