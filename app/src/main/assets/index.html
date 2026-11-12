@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no">
+<title>コンサル転職シミュレーター</title>
+<style>
+  :root{--bg:#f4f1ea;--card:#fff;--ink:#1d2433;--mut:#6b7385;--navy:#14284b;--acc:#c9a227;--ok:#1f8a4c;--ng:#c0392b;--line:#e3ddd0}
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;background:var(--bg);color:var(--ink);font-family:"Hiragino Sans","Noto Sans JP",system-ui,sans-serif;-webkit-tap-highlight-color:transparent}
+  .scr{position:fixed;inset:0;display:none;flex-direction:column;overflow-y:auto}
+  .scr.on{display:flex}
+  .wrap{width:100%;max-width:640px;margin:0 auto;padding:18px 16px 28px}
+  header.top{background:var(--navy);color:#fff;padding:14px 16px;font-weight:800;letter-spacing:.05em}
+  header.top small{display:block;font-weight:400;font-size:12px;opacity:.75;margin-top:2px}
+  h1{font-size:22px;margin:8px 0 6px}
+  .lead{color:var(--mut);font-size:14px;margin:0 0 18px;line-height:1.6}
+  label{display:block;font-size:13px;color:var(--mut);margin:14px 0 6px;font-weight:700}
+  input{width:100%;padding:12px;border:2px solid var(--line);border-radius:10px;font:inherit;font-size:17px;background:#fff}
+  .unit{display:flex;align-items:center;gap:8px} .unit span{color:var(--mut);white-space:nowrap}
+  .btn{display:block;width:100%;margin-top:18px;padding:15px;border:none;border-radius:12px;background:var(--navy);color:#fff;font:inherit;font-size:17px;font-weight:800}
+  .btn.sub{background:transparent;color:var(--navy);border:2px solid var(--navy);margin-top:10px;font-size:15px;padding:12px}
+  .firm{display:block;width:100%;text-align:left;background:var(--card);border:2px solid var(--line);border-radius:12px;padding:12px 14px;margin-top:10px;font:inherit}
+  .firm b{font-size:17px;display:block}
+  .firm .meta{font-size:12px;color:var(--mut);margin-top:3px}
+  .cat{display:inline-block;font-size:11px;font-weight:700;color:#fff;border-radius:4px;padding:1px 7px;margin-right:6px;vertical-align:2px}
+  .cat.strategy{background:#7a1f2b} .cat.general{background:#1f4e8a} .cat.domestic{background:#2d6a3e} .cat.it{background:#5b3f8a}
+  .star{color:var(--acc);letter-spacing:1px}
+  /* 面接画面 */
+  .ihead{background:var(--navy);color:#fff;padding:10px 16px;display:flex;align-items:center;gap:10px}
+  .ihead .av{font-size:30px}
+  .ihead b{display:block;font-size:15px} .ihead small{font-size:12px;opacity:.8}
+  .prog{height:5px;background:#203a66} .prog i{display:block;height:100%;background:var(--acc);transition:width .4s}
+  #chat{flex:1;overflow-y:auto;padding:14px 14px 8px}
+  .msg{max-width:88%;padding:11px 14px;border-radius:14px;margin:8px 0;line-height:1.6;font-size:16px;white-space:pre-wrap;animation:pop .25s}
+  .msg.q{background:#fff;border:1px solid var(--line);border-top-left-radius:4px}
+  .msg.a{background:var(--navy);color:#fff;margin-left:auto;border-top-right-radius:4px}
+  .msg.r{background:#fff8e1;border:1px dashed var(--acc);font-size:14px;color:#6b5410}
+  .step{font-size:12px;color:var(--mut);text-align:center;margin:14px 0 4px;letter-spacing:.1em}
+  @keyframes pop{from{opacity:0;transform:translateY(6px)}}
+  #opts{padding:10px 14px 18px;background:var(--bg);border-top:1px solid var(--line)}
+  #opts button{display:block;width:100%;text-align:left;margin-top:8px;padding:12px 14px;border:2px solid var(--line);border-radius:12px;background:#fff;font:inherit;font-size:15px;line-height:1.5}
+  #opts button:active{border-color:var(--navy)}
+  /* 結果 */
+  .result{margin:auto;width:100%;max-width:560px;padding:24px 18px;text-align:center}
+  .stamp{font-size:54px;font-weight:900;letter-spacing:.1em;margin:4px 0;transform:rotate(-6deg);display:inline-block;border:6px solid;border-radius:14px;padding:4px 22px}
+  .stamp.ng{color:var(--ng)} .stamp.ok{color:var(--ok)}
+  .box{background:#fff;border-radius:14px;padding:16px;margin-top:18px;text-align:left;line-height:1.7;font-size:15px;border:1px solid var(--line)}
+  .box h3{margin:0 0 6px;font-size:14px;color:var(--mut)}
+  .big{font-size:30px;font-weight:900;color:var(--navy)}
+  .link{display:block;margin-top:8px;padding:10px 12px;border-radius:10px;background:#eef2f8;color:var(--navy);text-decoration:none;font-weight:700;font-size:14px}
+  .link.cta{background:#0f8a6d;color:#fff;text-align:center;border-radius:999px;padding:12px}
+  @media (orientation: landscape){ .msg{max-width:70%} }
+</style>
+</head>
+<body>
+
+<!-- プロフィール -->
+<section class="scr on" id="profile">
+  <header class="top">コンサル転職シミュレーター<small>※登場する企業はすべて架空です</small></header>
+  <div class="wrap">
+    <h1>プロフィール</h1>
+    <p class="lead">あこがれのコンサルファームに挑戦しよう。ひとつでも地雷を踏んだら、その場で不合格。</p>
+    <label>名前</label><input id="pName" maxlength="12" placeholder="山田 太郎">
+    <label>年齢</label><div class="unit"><input id="pAge" type="number" inputmode="numeric" placeholder="28"><span>歳</span></div>
+    <label>現在の年収</label><div class="unit"><input id="pSal" type="number" inputmode="numeric" placeholder="550"><span>万円</span></div>
+    <button class="btn" id="toFirms">応募する企業を選ぶ</button>
+  </div>
+</section>
+
+<!-- 企業選択 -->
+<section class="scr" id="firms">
+  <header class="top">応募する企業を選択<small id="who"></small></header>
+  <div class="wrap" id="firmList"></div>
+</section>
+
+<!-- 面接 -->
+<section class="scr" id="interview">
+  <div class="ihead"><span class="av" id="iAv"></span><div><b id="iFirm"></b><small id="iName"></small></div></div>
+  <div class="prog"><i id="prog"></i></div>
+  <div id="chat"></div>
+  <div id="opts"></div>
+</section>
+
+<!-- 結果 -->
+<section class="scr" id="result">
+  <div class="result">
+    <div id="resStamp"></div>
+    <div id="resBody"></div>
+    <button class="btn" id="otherFirm">別の企業を受ける</button>
+    <button class="btn sub" id="retrySame">同じ企業にもう一度</button>
+    <button class="btn sub" id="toProfile">プロフィールを変える</button>
+  </div>
+</section>
+
+<script>
+"use strict";
+const $ = id => document.getElementById(id);
+const R = () => Math.random();
+const pick = a => a[Math.floor(R() * a.length)];
+const shuffle = a => a.map(x => [R(), x]).sort((p, q) => p[0] - q[0]).map(p => p[1]);
+const sleep = ms => new Promise(r => setTimeout(r, ms));
+function load(k, d){ try{ const v = localStorage.getItem(k); return v ? JSON.parse(v) : d; }catch(e){ return d; } }
+function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){} }
+
+// ================= 企業（すべて架空） =================
+// cat: strategy=戦略 / general=総合 / domestic=国内独立系 / it=IT系
+const CAT = {strategy:'戦略', general:'総合', domestic:'国内', it:'IT'};
+const FIRMS = [
+  {id:'mck', n:'マッキンジー・アンド・カンパニー', cat:'strategy', star:5, need:16, base:1300, av:'🧐', iv:'シニアパートナー 毛利',
+   note:'世界最高峰の戦略ファーム。社員は全員、資料の行間に命をかけている。',
+   special:{at:'motive', t:'御社のロゴのフォントが好きだからです', d:{all:-9}, fail:true, msg:'フォントについては、デザイン部に問い合わせてください。'}},
+  {id:'bcg', n:'ボストン・コンサルティング・グルメ', cat:'strategy', star:5, need:15, base:1250, av:'🍽️', iv:'マネージングディレクター 美食',
+   note:'戦略と食べ歩きの名門。ランチの店選びも戦略的に行う。',
+   special:{at:'motive', t:'御社の社員食堂の評判を聞いて、ぜひ食べたいと思いました', d:{all:4}, msg:'……わかってるね。うちの食堂のカレーは、戦略的に美味しい。'}},
+  {id:'bain', n:'ベイン・アンド・ベイン', cat:'strategy', star:5, need:15, base:1250, av:'😎', iv:'パートナー 倍野',
+   note:'結果にこだわる戦略ファーム。社名に「ベイン」が2回入っている理由は誰も知らない。',
+   special:{at:'motive', t:'社名に「ベイン」が2回あるので、2倍がんばれると思いました', d:{all:3}, msg:'ははは、いいね。……実は僕も同じ理由で入った。'}},
+  {id:'atk', n:'A.T.カーニバル', cat:'strategy', star:4, need:14, base:1150, av:'🎉', iv:'プリンシパル 祭',
+   note:'製造業に強い老舗戦略ファーム。年末のパーティーだけはやたら派手。',
+   special:{at:'motive', t:'御社のパーティーが日本一派手だと聞いたからです', d:{all:-9}, fail:true, msg:'それは……都市伝説だよ。お帰りください。'}},
+  {id:'rb', n:'ローランド・ハンバーガー', cat:'strategy', star:4, need:14, base:1100, av:'🍔', iv:'パートナー 肉厚',
+   note:'欧州発の戦略ファーム。オフィスがいつも香ばしい。',
+   special:{at:'motive', t:'ハンバーガーが大好きだからです', d:{all:8}, msg:'……君、ピクルスは抜く派？残す派？　……いや、合格だ。'}},
+  {id:'acc', n:'アクセルチュア', cat:'general', star:3, need:11, base:850, av:'🏎️', iv:'マネジング・ディレクター 加速',
+   note:'とにかく巨大な総合ファーム。アクセルは踏むが、ブレーキの場所は誰も知らない。',
+   special:{at:'motive', t:'アクセル全開で働きたいからです！', d:{all:3}, msg:'いいね！うちはブレーキがないから、ちょうどいい！'}},
+  {id:'dt', n:'デロイド・トマト', cat:'general', star:3, need:11, base:830, av:'🍅', iv:'パートナー 赤井',
+   note:'4大総合ファームのひとつ。社員の血液型はなぜかみんなトマト型。',
+   special:{at:'motive', t:'トマトが苦手なのを克服したいからです', d:{all:-9}, fail:true, msg:'……当社の社食は、全メニューにトマトが入っています。'}},
+  {id:'pwc', n:'プライスウォーター・ハウスクーラー', cat:'general', star:3, need:11, base:820, av:'❄️', iv:'ディレクター 冷房',
+   note:'4大総合ファームのひとつ。オフィスの冷房が年中18度。',
+   special:{at:'motive', t:'暑がりなので、涼しい職場で働きたいです', d:{all:4}, msg:'最高の志望動機だ。うちは一年中、冷えている。'}},
+  {id:'kpgm', n:'KPGM', cat:'general', star:3, need:10, base:800, av:'🔤', iv:'パートナー 文字',
+   note:'4大総合ファームのひとつ。社名のアルファベットの順番を、社員もよく間違える。',
+   special:{at:'motive', t:'KPMGさんに憧れています', d:{all:-9}, fail:true, msg:'うちはKPGMです。……出口はあちらです。'}},
+  {id:'eyy', n:'アーンスト・アンド・ヤンキー', cat:'general', star:3, need:10, base:800, av:'😤', iv:'シニアマネージャー 番長',
+   note:'4大総合ファームのひとつ。廊下ですれ違うと、なぜか挨拶が「ちーっす」。',
+   special:{at:'motive', t:'御社の「仲間を大事にする」文化に惹かれました', d:{all:4}, msg:'……おう。わかってんじゃねえか。'}},
+  {id:'nora', n:'野良総合研究所', cat:'domestic', star:3, need:10, base:900, av:'🐈', iv:'上席コンサルタント 野良',
+   note:'日本を代表するシンクタンク。会議室に、ときどき猫がいる。',
+   special:{at:'motive', t:'猫が好きだからです', d:{all:6}, msg:'（会議室の猫が、あなたのひざに乗った）……採用。'}},
+  {id:'bayc', n:'ベイカレー・コンサルティング', cat:'domestic', star:2, need:9, base:780, av:'🍛', iv:'マネージャー 辛口',
+   note:'急成長中の国内ファーム。毎週金曜はカレーの日。',
+   special:{at:'reverse', t:'御社のカレーは何辛ですか？', d:{all:5}, msg:'……5辛だ。ついてこられるか？'}},
+  {id:'ibn', n:'アイ・ビー・エヌ（あいびき・ミンチ）', cat:'it', star:2, need:8, base:750, av:'🥩', iv:'理事 合挽',
+   note:'IT系の巨人。正式名称は「あいびき・ミンチ・コーポレーション」。',
+   special:{at:'motive', t:'牛と豚の黄金比を、ITで追求したいからです', d:{all:6}, msg:'7対3だ。……君とはいい仕事ができそうだ。'}},
+];
+
+// ================= 不合格の条件（プロフィール） =================
+// 当てはまった時点で不合格。メッセージはちょっと大げさに
+function profileFail(p, f){
+  if (f.cat === 'strategy' && p.age >= 31) return `${p.age}歳……。うちの若手パートナーと同い年ですね。\n戦略ファームの「未経験」は30歳までです。`;
+  if (f.cat === 'general' && p.age >= 45) return `${p.age}歳の未経験……。\n上司が全員年下になりますが、耐えられますか？　……いえ、こちらが耐えられません。`;
+  if (f.cat === 'domestic' && p.age >= 50) return `${p.age}歳ですか。\n当社の社長より年上の方は、ちょっと……。`;
+  if (f.cat === 'it' && p.age >= 58) return `${p.age}歳……。\n定年まで、プロジェクトが1本も終わりません。`;
+  if (p.age < 22) return `${p.age}歳……？\nまずは学校に行きましょう。`;
+  if (p.sal >= 3000) return `年収${p.sal}万円……。\n当社のパートナーより高いです。むしろ、うちを買収しませんか？`;
+  if (f.cat === 'strategy' && p.sal >= 1800) return `年収${p.sal}万円は、うちの提示額を超えています。\n年収が下がっても来たい理由を、30文字で説明できますか？　……できませんよね。`;
+  if (f.cat === 'strategy' && p.sal < 300) return `年収${p.sal}万円……。\n失礼ですが、今のお仕事で何を学ばれたのでしょうか。`;
+  return null;
+}
+
+// ================= 質問 =================
+// d: 点数（all=全業態 / strategy / general / domestic / it）
+// fail: true（全業態で不合格）または ['strategy', …]（その業態だけ不合格）
+// r: 面接官のリアクション（不合格時はその理由）
+const STEPS = [
+  {key:'job', title:'現職の職種', q:'では、現在のお仕事を教えてください。', opts:[
+    {t:'事業会社の経営企画です', d:{all:3}, r:'経営企画。数字に強そうですね。'},
+    {t:'SIerでインフラ・サーバーを担当しています', d:{all:2, it:3, general:1}, r:'インフラが分かる人は、実はコンサルに少ないんですよ。技術を語れるPMOは重宝されます。'},
+    {t:'SIerでアプリ開発をしています', d:{all:2, it:2, general:1}, r:'開発経験。ITコンサルなら即戦力ですね。'},
+    {t:'法人営業です。売るのは得意です', d:{all:2, domestic:1}, r:'営業出身はクライアント受けがいいんですよ。'},
+    {t:'銀行員です', d:{all:2, strategy:1}, r:'財務諸表は読めそうですね。'},
+    {t:'公務員です', d:{all:1, domestic:2}, r:'官公庁案件、うちにもたくさんありますよ。'},
+    {t:'他社の現役コンサルタントです', d:{all:4}, r:'即戦力ですね。……で、なぜ辞めたいんです？'},
+    {t:'YouTuberです（登録者12人）', fail:['strategy','general'], d:{all:-2}, r:'12人……。ご家族ですか？'},
+    {t:'特にありません（ニートです）', fail:true, r:'「特にない」を、構造化してから出直してください。'},
+  ]},
+  {key:'pr', title:'自己PR', q:'自己PRをお願いします。', opts:[
+    {t:'課題を構造化し、仮説を立てて検証するのが得意です', d:{all:3, strategy:1}, r:'（メモを取る）……いいですね。'},
+    {t:'前職で業務を改善し、コストを20%削減しました', d:{all:3}, r:'数字で語れるのは強いですね。'},
+    {t:'誰とでもすぐ仲良くなれます', d:{all:1, domestic:1}, r:'なるほど。クライアントの懐に入るのは大事です。'},
+    {t:'体力には自信があります。3日寝なくても平気です', d:{all:1}, fail:['it'], r:'……いや、寝てください。当社は健康経営を推進しています。'},
+    {t:'パワポのアニメーションを100種類使えます', d:{all:-1}, fail:['strategy'], r:'アニメーションは……使わないでください。'},
+    {t:'特に強みはありませんが、伸びしろはあります', d:{all:-2}, fail:['strategy'], r:'伸びしろ……。何センチくらいでしょう。'},
+  ]},
+  {key:'motive', title:'志望動機', q:'なぜ、当社を志望されたのですか？', opts:[
+    {t:'経営課題の解決に、最前線で関わりたいからです', d:{all:2}, r:'王道ですね。'},
+    {t:'御社の◯◯業界での実績に惹かれました', d:{all:3}, r:'よく調べてきましたね。'},
+    {t:'成長できる環境に身を置きたいからです', d:{all:1}, r:'成長……。成長したあと、どうしたいんでしょう？'},
+    {t:'年収を上げたいからです', d:{all:0, strategy:-2, general:1}, r:'正直でいいですね。……正直すぎますが。'},
+    {t:'将来は起業したいので、その踏み台に', d:{all:1, strategy:1}, fail:['domestic'], r:'うちを踏み台にするのは、ちょっと困ります。'},
+    {t:'なんとなく、かっこいいからです', fail:true, r:'「なんとなく」をMECEに分解してから、また来てください。'},
+  ]},
+  {key:'q', title:'面接質問', count:3, pool:[
+    {q:'日本にある電柱の数を推定してください。', opts:[
+      {t:'面積と人口密度で地域を分けて、1kmあたりの本数から積み上げます', d:{all:3, strategy:1}, r:'いいアプローチです。（ホワイトボードを差し出す）'},
+      {t:'まず「電柱」の定義から確認させてください', d:{all:2, strategy:2}, r:'お、そこから来ますか。'},
+      {t:'Googleで調べます', d:{it:1}, fail:['strategy'], r:'……ネットがつながらない島に住んでいる、という前提でお願いします。'},
+      {t:'100本くらいですかね？', fail:true, r:'あなたの家の前だけで、もう5本あります。'},
+    ]},
+    {q:'あるカフェチェーンの売上が落ちています。原因をどう探りますか？', opts:[
+      {t:'売上を「客数×客単価」に分解して、どちらが落ちたかを見ます', d:{all:3}, r:'基本に忠実でいいですね。'},
+      {t:'まずお店に行って、コーヒーを飲んでみます', d:{all:1, domestic:1}, r:'現場主義。嫌いじゃないです。'},
+      {t:'店長を全員クビにします', fail:true, r:'……あなたが社長でなくて、本当によかった。'},
+      {t:'AIで全部分析します', d:{it:2, all:0}, fail:['strategy'], r:'で、そのAIに何を聞くんですか？'},
+    ]},
+    {q:'チームで意見が対立したら、どうしますか？', opts:[
+      {t:'お互いの前提をそろえ、判断の基準を決めてから議論します', d:{all:3}, r:'大人ですね。'},
+      {t:'声が大きいほうに従います', d:{all:-2}, fail:['strategy'], r:'うちは全員、声が大きいですよ。'},
+      {t:'飲みに行って解決します', d:{all:0, domestic:1}, r:'……経費精算はできませんが、いいでしょう。'},
+      {t:'自分の意見が通るまで、一歩も引きません', d:{all:-1}, fail:['general'], r:'当社は数万人います。全員と戦うつもりですか？'},
+    ]},
+    {q:'徹夜が3日続いています。どうしますか？', opts:[
+      {t:'優先順位をつけ直して、上司に相談します', d:{all:3}, r:'正解です。健康第一。'},
+      {t:'エナジードリンクを10本飲みます', d:{all:-1}, fail:['it'], r:'それは解決ではなく、先送りです。'},
+      {t:'そもそも徹夜しない働き方を提案します', d:{all:2, general:1}, r:'働き方改革。当社も推進中です。'},
+      {t:'定時なので帰ります', fail:['strategy'], d:{all:0, it:1}, r:'……プロジェクトは、定時に終わってくれないんですよ。'},
+    ]},
+    {q:'日本のペット市場は、10年後どうなると思いますか？', opts:[
+      {t:'飼育頭数は減っても、1匹あたりの支出が増えて市場は伸びると考えます', d:{all:3, strategy:1}, r:'ちゃんとドライバーを分けていますね。'},
+      {t:'猫が増えると思います', d:{all:1, domestic:1}, r:'……根拠は？　……猫がかわいいから？'},
+      {t:'犬と猫が人類を支配していると思います', fail:true, r:'……ある意味、もう支配されているかもしれませんね。お帰りください。'},
+      {t:'分かりません', d:{all:-3}, fail:['strategy','general'], r:'「分からない」で終わるコンサルタントは、いません。'},
+    ]},
+    {q:'クライアントの社長が、明らかに間違った判断をしようとしています。', opts:[
+      {t:'データで根拠を示して、別の選択肢と比べてもらいます', d:{all:3}, r:'それができる人は、本当に少ないんです。'},
+      {t:'社長がそう言うなら、従います', d:{all:-1}, fail:['strategy'], r:'それなら、コンサルはいりませんよね。'},
+      {t:'社長の秘書を味方につけます', d:{all:2, domestic:1}, r:'……あなた、なかなかやりますね。'},
+      {t:'社長を論破します', d:{all:-1}, fail:['domestic'], r:'次の日から、出入り禁止になりますね。'},
+    ]},
+    {q:'なぜコンサルなんですか？　事業会社ではダメなんですか？', opts:[
+      {t:'いろいろな業界・会社の課題に、外から関われるからです', d:{all:3}, r:'定番ですが、ちゃんと言える人は少ないです。'},
+      {t:'今の会社の課題を、外から変える側になりたいと思ったからです', d:{all:3, domestic:1}, r:'具体的な原体験がありますね。'},
+      {t:'事業会社は、飽きそうだからです', d:{all:-1}, fail:['strategy'], r:'うちのクライアントは、全部事業会社なんですが……。'},
+      {t:'名刺に「コンサルタント」と書きたいからです', fail:['strategy','general'], d:{all:-2}, r:'名刺なら、印刷屋さんで作れますよ。'},
+    ]},
+    {q:'数あるファームの中で、なぜ当社なんですか？', opts:[
+      {t:'御社の◯◯領域の強みと、私の経験が重なるからです', d:{all:3}, r:'……ちゃんと調べてきてますね。'},
+      {t:'第一志望です！（全社に同じことを言っています）', fail:true, r:'カッコの中、声に出ていましたよ。'},
+      {t:'内定をいただけたら、考えます', fail:['strategy','general'], d:{all:-1}, r:'では、こちらも考えておきますね。'},
+      {t:'説明会の雰囲気が、とても良かったからです', d:{all:1}, r:'雰囲気……。どのあたりが、ですか？'},
+    ]},
+    {q:'これまでで、一番の失敗を教えてください。', opts:[
+      {t:'納期を守れなかった経験と、その後に仕組みで再発を防いだ話をします', d:{all:3}, r:'失敗から仕組みを作れる人は、強いです。'},
+      {t:'失敗したことは、ありません', fail:true, r:'……それが、今日一番の失敗ですね。'},
+      {t:'上司の指示が悪くて、プロジェクトが炎上しました', d:{all:-2}, fail:['strategy','domestic'], r:'うちに来たら、私があなたの上司になるんですが。'},
+      {t:'寝坊して、大事な商談に遅れました', d:{all:0}, r:'……正直でよろしい。今日は間に合いましたね。'},
+    ]},
+    {q:'5年後、どうなっていたいですか？', opts:[
+      {t:'マネージャーとして、案件を任される人になっていたいです', d:{all:3}, r:'5年でマネージャー。いいペースですね。'},
+      {t:'御社の社長になっています', d:{all:0, strategy:1}, fail:['domestic'], r:'……社長は今、私の目の前の部屋にいます。'},
+      {t:'FIREして、南の島にいます', fail:true, r:'では、今すぐ南の島へどうぞ。'},
+      {t:'正直、まだ分かりません', d:{all:-2}, fail:['strategy'], r:'「分からない」を、仮説で埋めるのがコンサルです。'},
+    ]},
+    {q:'システム刷新プロジェクトが半年遅れています。最初にやることは？', opts:[
+      {t:'遅れの原因を分解して、クリティカルパスを洗い出します', d:{all:2, it:2}, r:'いいですね。現場を知っている人の答えです。'},
+      {t:'人を倍に増やします', d:{all:-1}, fail:['it'], r:'遅れているプロジェクトに人を足すと、もっと遅れますよ。'},
+      {t:'ベンダーを呼び出して怒ります', d:{all:-2}, r:'……怒っても、コードは書かれません。'},
+      {t:'スケジュールを引き直して、関係者に正直に説明します', d:{all:3}, r:'それが一番むずかしくて、一番大事です。'},
+    ]},
+  ]},
+  {key:'reverse', title:'逆質問', q:'最後に、何か質問はありますか？', opts:[
+    {t:'御社で活躍している人の共通点を教えてください', d:{all:3}, r:'いい質問ですね。……そうですねえ（10分語る）'},
+    {t:'入社までに勉強しておくべきことはありますか？', d:{all:2}, r:'もう入社する気ですね。嫌いじゃないです。'},
+    {t:'残業はどれくらいありますか？', d:{all:0, it:1}, fail:['strategy'], r:'……それは、プロジェクト次第ですね。（遠い目）'},
+    {t:'リモートワークは週何日できますか？', d:{all:0, general:1}, r:'できますよ。……クライアントが許せば、ですが。'},
+    {t:'特にありません', fail:true, r:'当社に興味がない、ということでよろしいですね。'},
+    {t:'面接官の方の年収を教えてください', fail:['strategy','general','domestic'], d:{it:-2}, r:'……それは、個人情報です。'},
+  ]},
+];
+
+// ================= 進行 =================
+let P = load('profile', {name:'', age:'', sal:''});
+$('pName').value = P.name; $('pAge').value = P.age; $('pSal').value = P.sal;
+let F = null, score = 0, steps = [], si = 0, history = [], shownSign = false, failedAt = '';
+
+$('toFirms').onclick = () => {
+  const name = $('pName').value.trim() || 'あなた';
+  const age = parseInt($('pAge').value, 10), sal = parseInt($('pSal').value, 10);
+  if (!(age > 0 && age < 120)){ $('pAge').focus(); return; }
+  if (!(sal >= 0 && sal < 100000)){ $('pSal').focus(); return; }
+  P = {name, age, sal}; save('profile', P);
+  renderFirms(); show('firms');
+};
+function renderFirms(){
+  $('who').textContent = `${P.name}（${P.age}歳・年収${P.sal}万円）`;
+  const L = $('firmList'); L.innerHTML = '<p class="lead" style="margin-top:6px">どこを受けますか？</p>';
+  const done = load('offers', {});
+  FIRMS.forEach(f => {
+    const b = document.createElement('button'); b.className = 'firm';
+    b.innerHTML = `<b>${f.n}${done[f.id] ? '　🎉' : ''}</b><div class="meta"><span class="cat ${f.cat}">${CAT[f.cat]}</span><span class="star">${'★'.repeat(f.star)}${'☆'.repeat(5 - f.star)}</span>　${f.note}</div>`;
+    b.onclick = () => start(f);
+    L.appendChild(b);
+  });
+}
+
+function start(f){
+  F = f; score = 0; si = 0; history = []; shownSign = false;
+  const qs = STEPS.find(s => s.key === 'q');
+  steps = [];
+  STEPS.forEach(s => {
+    if (s.key === 'q') shuffle(qs.pool).slice(0, qs.count).forEach((q, i) => steps.push({key:'q', title:`面接質問 ${i + 1}`, q:q.q, opts:q.opts}));
+    else steps.push(s);
+  });
+  $('iAv').textContent = f.av; $('iFirm').textContent = f.n; $('iName').textContent = `面接官：${f.iv}`;
+  $('chat').innerHTML = ''; $('opts').innerHTML = '';
+  show('interview');
+  run();
+}
+
+function msg(text, cls){
+  const d = document.createElement('div'); d.className = 'msg ' + cls; d.textContent = text;
+  $('chat').appendChild(d); $('chat').scrollTop = $('chat').scrollHeight; return d;
+}
+function stepLabel(t){ const d = document.createElement('div'); d.className = 'step'; d.textContent = `― ${t} ―`; $('chat').appendChild(d); }
+
+async function run(){
+  await sleep(300);
+  msg(`${P.name}さん、本日はよろしくお願いします。${F.iv.split(' ').pop()}です。\nまずは簡単に、ご経歴を拝見しますね。`, 'q');
+  await sleep(1200);
+  msg(`（${P.age}歳、現年収${P.sal}万円……）`, 'r');
+  await sleep(1100);
+  const pf = profileFail(P, F);
+  if (pf) return fail(pf, 'プロフィール');
+  msg('……なるほど。では、さっそく始めましょう。', 'q');
+  await sleep(700);
+  ask();
+}
+
+function ask(){
+  $('prog').style.width = (si / steps.length * 100) + '%';
+  if (si >= steps.length) return finish();
+  const s = steps[si];
+  stepLabel(s.title);
+  msg(s.q, 'q');
+  let opts = s.opts.slice();
+  if (F.special && F.special.at === s.key) opts.splice(Math.floor(R() * (opts.length + 1)), 0, Object.assign({special: true}, F.special, {r: F.special.msg}));
+  // 選択肢は毎回ばらばらの順番で（特別な選択肢も紛れ込む）
+  opts = s.key === 'job' ? opts : shuffle(opts);
+  const box = $('opts'); box.innerHTML = '';
+  opts.forEach(o => {
+    const b = document.createElement('button'); b.textContent = o.t;
+    b.onclick = () => answer(s, o);
+    box.appendChild(b);
+  });
+}
+
+async function answer(s, o){
+  $('opts').innerHTML = '';
+  msg(o.t, 'a');
+  history.push({step: s.title, a: o.t});
+  await sleep(700);
+  const failHere = o.fail === true || (Array.isArray(o.fail) && o.fail.includes(F.cat));
+  if (failHere) return fail(o.r || o.msg, s.title);
+  const d = o.d || {};
+  const pts = (d.all || 0) + (d[F.cat] || 0);
+  score += pts;
+  msg(o.r || 'なるほど。', 'q');
+  if (!o.special){
+    await sleep(500);
+    msg(pts >= 3 ? '（面接官が深くうなずいた）' : pts >= 1 ? '（面接官がメモを取っている）' : pts === 0 ? '（面接官の表情は変わらない）' : '（面接官がペンを置いた……）', 'r');
+    // 調子がいいと、合格サインっぽいことが起きる
+    if (pts >= 3 && score >= F.need * .5 && !shownSign && R() < .5){
+      shownSign = true;
+      await sleep(700);
+      msg('💡 合格サイン？：' + pick(['面接官が、入社後の配属の話を始めた。','予定の時間を過ぎても、面接官が質問を続けている。','面接官が、自分の若手時代の失敗談を話し始めた。','「ちなみに、ほかの選考はどのくらい進んでいますか？」と聞かれた。']), 'r');
+    }
+  }
+  await sleep(900);
+  si++; ask();
+}
+
+async function fail(reason, where){
+  $('prog').style.width = '100%';
+  msg(reason, 'q');
+  await sleep(1300);
+  $('resStamp').innerHTML = '<div class="stamp ng">不合格</div>';
+  $('resBody').innerHTML = `
+    <div class="box"><h3>${F.n}　面接官コメント</h3>${esc(reason).replace(/\n/g, '<br>')}</div>
+    <div class="box"><h3>落ちたところ</h3>${esc(where)}${history.length ? '<br><span style="color:var(--mut);font-size:13px">あなたの回答：「' + esc(history[history.length - 1].a) + '」</span>' : ''}</div>
+    ${tipBox(where)}`;
+  show('result');
+}
+
+async function finish(){
+  await sleep(400);
+  if (score < F.need){
+    return fail(`本日はありがとうございました。\n……正直に申し上げて、決め手に欠けました。\n（合格ライン ${F.need}点に対して ${score}点）`, '総合評価');
+  }
+  msg('本日はありがとうございました。……結果は、今お伝えしますね。', 'q');
+  await sleep(1500);
+  const age = P.age, bonus = Math.max(0, score - F.need) * 25;
+  let offer = F.base + bonus + (F.cat === 'strategy' ? (age - 24) * 30 : (age - 24) * 20);
+  offer = Math.round(Math.max(offer, F.base * .8) / 10) * 10;
+  const diff = P.sal > 0 ? Math.round((offer / P.sal - 1) * 100) : 0;
+  const title = F.cat === 'strategy' ? (age <= 26 ? 'ビジネスアナリスト' : 'アソシエイト') : (age <= 27 ? 'コンサルタント' : age <= 33 ? 'シニアコンサルタント' : 'マネージャー');
+  const offers = load('offers', {}); offers[F.id] = {offer, at: Date.now()}; save('offers', offers);
+  $('resStamp').innerHTML = '<div class="stamp ok">内定</div>';
+  $('resBody').innerHTML = `
+    <div class="box"><h3>${F.n}　オファー</h3>
+      役職：${title}<br>提示年収：<span class="big">${offer.toLocaleString()}万円</span><br>
+      <span style="color:${diff >= 0 ? 'var(--ok)' : 'var(--ng)'};font-weight:700">現年収から ${diff >= 0 ? '+' : ''}${diff}%</span></div>
+    <div class="box"><h3>面接官からひとこと</h3>${esc(pick([
+      'ようこそ。月曜の朝9時に、パワポを開いて待っていてください。',
+      '入社初日から、クライアント先に直行です。スーツは3着用意してください。',
+      'おめでとうございます。……ところで、Excelのショートカットはどこまで覚えていますか？',
+      '一緒に働けるのを楽しみにしています。睡眠は、今のうちにとっておいてください。',
+    ]))}</div>
+    <div class="box"><h3>スコア</h3>${score}点（合格ライン ${F.need}点）　内定獲得：${Object.keys(offers).length} / ${FIRMS.length}社</div>
+    <div class="box"><h3>本物の選考も受けてみる？</h3>ゲームの内定はここまで。実際のファームの選考対策は、現役コンサルに相談できます。
+    <a class="link cta" href="${BLOG}lp">現役コンサルに無料で相談する</a>
+    <div style="font-size:12px;color:var(--mut);margin-top:6px">履歴書不要・完全無料・勧誘なし</div></div>`;
+  show('result');
+}
+// 落ちたところ・受かったあとに読む記事（ogumatoshihiro.com）
+const BLOG = 'https://ogumatoshihiro.com/';
+const TIPS = {
+  'プロフィール': [466, '未経験からのコンサル転職、年齢と年収の現実'],
+  '現職の職種': [128, '未経験からコンサルに転職するには'],
+  '自己PR': [451, '面接の想定問答と、通る答え方'],
+  '志望動機': [330, '志望動機の作り方'],
+  '面接質問': [347, 'ケース面接の解き方'],
+  '逆質問': [37, '面接で評価される逆質問'],
+  '総合評価': [451, '面接の想定問答と、通る答え方'],
+};
+function tipBox(where){
+  const key = where.startsWith('面接質問') ? '面接質問' : where;
+  const t = TIPS[key] || TIPS['総合評価'];
+  return `<div class="box"><h3>本番の対策はこちら</h3>
+    <a class="link" href="${BLOG}?p=${t[0]}">📖 ${esc(t[1])}（ブログ）</a>
+    <a class="link cta" href="${BLOG}lp">現役コンサルに無料で相談する</a>
+    <div style="font-size:12px;color:var(--mut);margin-top:6px">履歴書不要・完全無料・勧誘なし</div></div>`;
+}
+function esc(s){ return String(s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+$('otherFirm').onclick = () => { renderFirms(); show('firms'); };
+$('retrySame').onclick = () => start(F);
+$('toProfile').onclick = () => show('profile');
+function show(id){ document.querySelectorAll('.scr').forEach(s => s.classList.toggle('on', s.id === id)); }
+</script>
+</body>
+</html>
