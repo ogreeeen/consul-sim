@@ -67,7 +67,8 @@
   .talk{flex:1;display:flex;flex-direction:column;min-height:0;background:var(--bg)}
   #interview .prog{height:4px;background:#d8d2c4;flex:none}
   #chat{min-height:0}
-  #opts{flex:none;max-height:34vh;overflow-y:auto}
+  #opts{flex:none;max-height:30vh;overflow-y:auto}
+  #chat{flex:1 1 auto;min-height:120px}
   #opts button{padding:10px 12px;font-size:14px;margin-top:6px}
   /* 表情とまばたき */
   .eye{transform-box:fill-box;transform-origin:center;animation:blink 4.5s infinite}
@@ -150,45 +151,45 @@ function save(k, v){ try{ localStorage.setItem(k, JSON.stringify(v)); }catch(e){
 // cat: strategy=戦略 / general=総合 / domestic=国内独立系 / it=IT系
 const CAT = {strategy:'戦略', general:'総合', domestic:'国内', it:'IT'};
 const FIRMS = [
-  {id:'mck', n:'マッキンジー・アンド・カンパニー', cat:'strategy', star:5, need:16, base:1300, av:'🧐', iv:'シニアパートナー 毛利',
-   note:'世界最高峰の戦略ファーム。社員は全員、資料の行間に命をかけている。',
-   special:{at:'motive', t:'御社のロゴのフォントが好きだからです', d:{all:-9}, fail:true, msg:'フォントについては、デザイン部に問い合わせてください。'}},
-  {id:'bcg', n:'ボストン・コンサルティング・グルメ', cat:'strategy', star:5, need:15, base:1250, av:'🍽️', iv:'マネージングディレクター 美食',
-   note:'戦略と食べ歩きの名門。ランチの店選びも戦略的に行う。',
-   special:{at:'motive', t:'御社の社員食堂の評判を聞いて、ぜひ食べたいと思いました', d:{all:4}, msg:'……わかってるね。うちの食堂のカレーは、戦略的に美味しい。'}},
-  {id:'bain', n:'ベイン・アンド・ベイン', cat:'strategy', star:5, need:15, base:1250, av:'😎', iv:'パートナー 倍野',
-   note:'結果にこだわる戦略ファーム。社名に「ベイン」が2回入っている理由は誰も知らない。',
-   special:{at:'motive', t:'社名に「ベイン」が2回あるので、2倍がんばれると思いました', d:{all:3}, msg:'ははは、いいね。……実は僕も同じ理由で入った。'}},
-  {id:'atk', n:'A.T.カーニバル', cat:'strategy', star:4, need:14, base:1150, av:'🎉', iv:'プリンシパル 祭',
-   note:'製造業に強い老舗戦略ファーム。年末のパーティーだけはやたら派手。',
-   special:{at:'motive', t:'御社のパーティーが日本一派手だと聞いたからです', d:{all:-9}, fail:true, msg:'それは……都市伝説だよ。お帰りください。'}},
-  {id:'rb', n:'ローランド・ハンバーガー', cat:'strategy', star:4, need:14, base:1100, av:'🍔', iv:'パートナー 肉厚',
-   note:'欧州発の戦略ファーム。オフィスがいつも香ばしい。',
-   special:{at:'motive', t:'ハンバーガーが大好きだからです', d:{all:8}, msg:'……君、ピクルスは抜く派？残す派？　……いや、合格だ。'}},
-  {id:'acc', n:'アクセルチュア', cat:'general', star:3, need:11, base:850, av:'🏎️', iv:'マネジング・ディレクター 加速',
-   note:'とにかく巨大な総合ファーム。アクセルは踏むが、ブレーキの場所は誰も知らない。',
-   special:{at:'motive', t:'アクセル全開で働きたいからです！', d:{all:3}, msg:'いいね！うちはブレーキがないから、ちょうどいい！'}},
-  {id:'dt', n:'デロイド・トマト', cat:'general', star:3, need:11, base:830, av:'🍅', iv:'パートナー 赤井',
-   note:'4大総合ファームのひとつ。社員の血液型はなぜかみんなトマト型。',
-   special:{at:'motive', t:'トマトが苦手なのを克服したいからです', d:{all:-9}, fail:true, msg:'……当社の社食は、全メニューにトマトが入っています。'}},
-  {id:'pwc', n:'プライスウォーター・ハウスクーラー', cat:'general', star:3, need:11, base:820, av:'❄️', iv:'ディレクター 冷房',
-   note:'4大総合ファームのひとつ。オフィスの冷房が年中18度。',
-   special:{at:'motive', t:'暑がりなので、涼しい職場で働きたいです', d:{all:4}, msg:'最高の志望動機だ。うちは一年中、冷えている。'}},
-  {id:'kpgm', n:'KPGM', cat:'general', star:3, need:10, base:800, av:'🔤', iv:'パートナー 文字',
-   note:'4大総合ファームのひとつ。社名のアルファベットの順番を、社員もよく間違える。',
-   special:{at:'motive', t:'KPMGさんに憧れています', d:{all:-9}, fail:true, msg:'うちはKPGMです。……出口はあちらです。'}},
-  {id:'eyy', n:'アーンスト・アンド・ヤンキー', cat:'general', star:3, need:10, base:800, av:'😤', iv:'シニアマネージャー 番長',
-   note:'4大総合ファームのひとつ。廊下ですれ違うと、なぜか挨拶が「ちーっす」。',
-   special:{at:'motive', t:'御社の「仲間を大事にする」文化に惹かれました', d:{all:4}, msg:'……おう。わかってんじゃねえか。'}},
-  {id:'nora', n:'野良総合研究所', cat:'domestic', star:3, need:10, base:900, av:'🐈', iv:'上席コンサルタント 野良',
-   note:'日本を代表するシンクタンク。会議室に、ときどき猫がいる。',
-   special:{at:'motive', t:'猫が好きだからです', d:{all:6}, msg:'（会議室の猫が、あなたのひざに乗った）……採用。'}},
-  {id:'bayc', n:'ベイカレー・コンサルティング', cat:'domestic', star:2, need:9, base:780, av:'🍛', iv:'マネージャー 辛口',
-   note:'急成長中の国内ファーム。毎週金曜はカレーの日。',
-   special:{at:'reverse', t:'御社のカレーは何辛ですか？', d:{all:5}, msg:'……5辛だ。ついてこられるか？'}},
-  {id:'ibn', n:'アイ・ビー・エヌ（あいびき・ミンチ）', cat:'it', star:2, need:8, base:750, av:'🥩', iv:'理事 合挽',
-   note:'IT系の巨人。正式名称は「あいびき・ミンチ・コーポレーション」。',
-   special:{at:'motive', t:'牛と豚の黄金比を、ITで追求したいからです', d:{all:6}, msg:'7対3だ。……君とはいい仕事ができそうだ。'}},
+  {id:'mck', n:'マクレイン・アンド・カンパニー', cat:'strategy', star:5, need:16, base:1300, iv:'シニアパートナー 森田',
+   note:'世界トップクラスの戦略ファーム。経営トップの最重要課題だけを扱う。',
+   special:{at:'motive', t:'御社のロゴのデザインが好きだからです', d:{all:-9}, fail:true, msg:'……ロゴについては、広報に問い合わせてください。'}},
+  {id:'bcg', n:'ボストン・ストラテジー・グループ', cat:'strategy', star:5, need:15, base:1250, iv:'マネージングディレクター 高橋',
+   note:'米国発の大手戦略ファーム。独自のフレームワークで知られる。',
+   special:{at:'motive', t:'御社が発表しているレポートを、毎回読んでいます', d:{all:4}, msg:'……ちなみに、どのレポートが一番でしたか？（少し嬉しそうだ）'}},
+  {id:'bain', n:'ブレイン・アンド・パートナーズ', cat:'strategy', star:5, need:15, base:1250, iv:'パートナー 佐伯',
+   note:'結果にこだわる戦略ファーム。PEファンド向けの案件に強い。',
+   special:{at:'motive', t:'結果にこだわる御社の文化に共感しました', d:{all:3}, msg:'うちの社是を、よく調べてきましたね。'}},
+  {id:'atk', n:'A.D.カーライル', cat:'strategy', star:4, need:14, base:1150, iv:'プリンシパル 松本',
+   note:'製造業に強い老舗の戦略ファーム。調達・コスト削減の実績が豊富。',
+   special:{at:'motive', t:'御社の年末パーティーが派手だと聞いたからです', d:{all:-9}, fail:true, msg:'……それは、どこで聞いたんですか。本日はお帰りください。'}},
+  {id:'rb', n:'ローゼンベルク・ストラテジー', cat:'strategy', star:4, need:14, base:1100, iv:'パートナー 井上',
+   note:'欧州発の戦略ファーム。自動車・製造業の案件に強い。',
+   special:{at:'motive', t:'欧州の製造業の知見を、日本企業に生かしたいからです', d:{all:6}, msg:'……うちの強みを、正確に分かっていますね。'}},
+  {id:'acc', n:'アクセリア・コンサルティング', cat:'general', star:3, need:11, base:850, iv:'マネジング・ディレクター 加藤',
+   note:'世界最大級の総合ファーム。戦略からシステム導入まで何でもやる。',
+   special:{at:'motive', t:'スピード感のある環境で、とにかく打席に立ちたいです', d:{all:3}, msg:'いいですね。うちは、打席だけはいくらでもありますよ。'}},
+  {id:'dt', n:'デロワ・トーマス コンサルティング', cat:'general', star:3, need:11, base:830, iv:'パートナー 赤井',
+   note:'4大会計事務所系の総合ファーム。業界別のチームが厚い。',
+   special:{at:'motive', t:'正直、ほかのファームとの違いはよく分かっていません', d:{all:-9}, fail:true, msg:'……では、違いが分かってから、また来てください。'}},
+  {id:'pwc', n:'ウォーターハウス・アドバイザリー', cat:'general', star:3, need:11, base:820, iv:'ディレクター 藤井',
+   note:'4大会計事務所系の総合ファーム。M&Aや規制対応に強い。',
+   special:{at:'motive', t:'監査法人グループとしての信頼感に惹かれました', d:{all:4}, msg:'そこは、うちが一番大事にしているところです。'}},
+  {id:'kpgm', n:'KPGアドバイザリー', cat:'general', star:3, need:10, base:800, iv:'パートナー 石田',
+   note:'4大会計事務所系の総合ファーム。リスク・ガバナンス領域に強い。',
+   special:{at:'motive', t:'KPGマネジメントさんに、ずっと憧れていました', d:{all:-9}, fail:true, msg:'うちは「KPGアドバイザリー」です。……他社さんと、お間違えでは？'}},
+  {id:'eyy', n:'アーンスト・パートナーズ', cat:'general', star:3, need:10, base:800, iv:'シニアマネージャー 坂本',
+   note:'4大会計事務所系の総合ファーム。チームワークを重視する社風。',
+   special:{at:'motive', t:'御社の「仲間を大事にする」社風に惹かれました', d:{all:4}, msg:'……そこを見てくれたのは、嬉しいですね。'}},
+  {id:'nora', n:'野沢総合研究所', cat:'domestic', star:3, need:10, base:900, iv:'上席コンサルタント 中野',
+   note:'日本を代表するシンクタンク。官公庁の政策づくりにも深く関わる。',
+   special:{at:'motive', t:'官公庁の政策づくりに、上流から関わりたいからです', d:{all:4}, msg:'シンクタンクの本丸ですね。'}},
+  {id:'bayc', n:'ベイクレスト・コンサルティング', cat:'domestic', star:2, need:9, base:780, iv:'マネージャー 吉田',
+   note:'急成長中の国内独立系ファーム。若手でも大きな裁量を持てる。',
+   special:{at:'reverse', t:'御社がここまで急成長できた理由は、何ですか？', d:{all:4}, msg:'……それは、入社してから教えます。（にやりと笑った）'}},
+  {id:'ibn', n:'IBCコンサルティング', cat:'it', star:2, need:8, base:750, iv:'理事 合田',
+   note:'IT系の老舗。システムとビジネスの両方をつなぐ案件が中心。',
+   special:{at:'motive', t:'システムとビジネスの両方が分かる人材になりたいからです', d:{all:5}, msg:'それができる人は、今いちばん足りていません。'}},
 ];
 
 // ================= 面接官の見た目 =================
@@ -489,11 +490,16 @@ async function askAsync(s){
   // 選択肢は毎回ばらばらの順番で（特別な選択肢も紛れ込む）
   opts = s.key === 'job' ? opts : shuffle(opts);
   const box = $('opts'); box.innerHTML = '';
+  // 質問を読む時間をとってから選択肢を出す
+  await sleep(1400);
   opts.forEach(o => {
     const b = document.createElement('button'); b.textContent = o.t;
     b.onclick = () => { stopTimer(); answer(s, o); };
     box.appendChild(b);
   });
+  // 選択肢が出て会話欄が狭くなっても、最新の発言が見えるように
+  box.scrollTop = 0;
+  requestAnimationFrame(() => { $('chat').scrollTop = $('chat').scrollHeight; });
   startTimer();
 }
 
